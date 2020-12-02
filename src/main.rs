@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate nom;
 use std::io::{Error};
 mod lib;
