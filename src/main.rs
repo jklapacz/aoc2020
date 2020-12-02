@@ -20,14 +20,18 @@ fn main() -> Result<(), Error> {
                     .filter(|s| !s.is_empty())
                     .map(|s| s.parse().unwrap())
                     .collect();
+                let part_1 = find_sum_to_2020(&input_vector);
                 assert_eq!(
-                    find_sum_to_2020(&input_vector),
+                    part_1,
                     scenario["outputs"][0].as_i64().unwrap()
                 );
+                let part_2 = find_sum_3_to_2020(&input_vector);
                 assert_eq!(
-                    find_sum_3_to_2020(&input_vector),
+                    part_2,
                     scenario["outputs"][1].as_i64().unwrap()
                 );
+                println!("part 1 answer: {:?}", part_1);
+                println!("part 2 answer: {:?}", part_2);
             }
         }
     }
