@@ -1,5 +1,9 @@
 image:
   file: .gitpod.Dockerfile
+  
+tasks:
+    - init: >
+        cargo install --path .
 vscode:
   extensions:
     - webfreak.debug@0.24.0:1zVcRsAhewYEX3/A9xjMNw==

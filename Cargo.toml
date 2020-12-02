@@ -6,3 +6,4 @@ authors = ["Jakub Klapacz <jakub@k5z.dev>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+error-chain = "0.12.4"
