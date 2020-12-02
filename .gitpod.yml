@@ -3,7 +3,7 @@ image:
   
 tasks:
     - init: >
-        cargo install --path .
+        cargo clean && cargo install --path .
 vscode:
   extensions:
     - hbenl.vscode-test-explorer@2.15.0:koqDUMWDPJzELp/hdS/lWw==
@@ -12,7 +12,6 @@ vscode:
     - belfz.search-crates-io@1.2.1:kSLnyrOhXtYPjQpKnMr4eQ==
     - bungcip.better-toml@0.3.2:3QfgGxxYtGHfJKQU7H0nEw==
     - webfreak.debug@0.24.0:1zVcRsAhewYEX3/A9xjMNw==
-    - TabNine.tabnine-vscode
 
 github:
   prebuilds:
