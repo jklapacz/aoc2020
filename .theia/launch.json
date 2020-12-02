@@ -8,7 +8,7 @@
           "request": "launch",
           "name": "Debug Rust Code",
           "preLaunchTask": "cargo",
-          "target": "${workspaceFolder}/target/debug/rust_debug",
+          "target": "${workspaceFolder}/target/debug/aoc",
           "cwd": "${workspaceFolder}",
           "valuesFormatting": "parseText"
       }
