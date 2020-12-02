@@ -3,6 +3,7 @@ use std::io::Read;
 use std::io::{self, BufRead, Error};
 use std::path::Path;
 use std::{env, fs};
+use std::assert;
 extern crate yaml_rust;
 use yaml_rust::{Yaml, YamlEmitter, YamlLoader};
 
@@ -19,7 +20,7 @@ fn main() -> Result<(), Error> {
             let docs = YamlLoader::load_from_str(&c).unwrap();
             let scenarios = &docs[0]["scenarios"].as_vec().unwrap();
             for scenario in scenarios.iter() {
-                let input_vector: Vec<i32> = scenario["input"]
+                let input_vector: Vec<i64> = scenario["input"]
                     .as_str()
                     .unwrap()
                     .split("\n")
@@ -27,11 +28,12 @@ fn main() -> Result<(), Error> {
                     .filter(|s| !s.is_empty())
                     .map(|s| s.parse().unwrap())
                     .collect();
-                println!("sum to 2020: {:?}", find_sum_to_2020(&input_vector));
-                println!("sum 3 to 2020: {:?}", find_sum_3_to_2020(&input_vector));
-                // println!("vec: {:?}", input_vector);
-                println!("input {:?}", scenario["input"]);
-                println!("output {:?}", scenario["outputs"]);
+                assert_eq!(find_sum_to_2020(&input_vector), scenario["outputs"][0].as_i64().unwrap());
+                assert_eq!(find_sum_3_to_2020(&input_vector), scenario["outputs"][1].as_i64().unwrap());
+                // println!("sum to 2020: {:?}", find_sum_to_2020(&input_vector));
+                // println!("sum 3 to 2020: {:?}", find_sum_3_to_2020(&input_vector));
+                // println!("input {:?}", scenario["input"]);
+                // println!("output {:?}", scenario["outputs"]);
             }
             // for scenario in &docs[0]["scenarios"] {
 
@@ -76,7 +78,7 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn find_sum_to_2020(expenses: &Vec<i32>) -> i32 {
+fn find_sum_to_2020(expenses: &Vec<i64>) -> i64 {
     for x in expenses.iter() {
         for y in expenses.iter() {
             if x + y == 2020 {
@@ -87,7 +89,7 @@ fn find_sum_to_2020(expenses: &Vec<i32>) -> i32 {
     return 0;
 }
 
-fn find_sum_3_to_2020(expenses: &Vec<i32>) -> i32 {
+fn find_sum_3_to_2020(expenses: &Vec<i64>) -> i64 {
     for x in expenses.iter() {
         for y in expenses.iter() {
             for z in expenses.iter() {
