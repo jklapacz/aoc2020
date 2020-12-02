@@ -7,3 +7,5 @@ tasks:
 vscode:
   extensions:
     - webfreak.debug@0.24.0:1zVcRsAhewYEX3/A9xjMNw==
+    - serayuzgur.crates@0.5.3
+    - belfz.search-crates-io@1.2.1
