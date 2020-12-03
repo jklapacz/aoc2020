@@ -78,9 +78,7 @@ pub mod day01 {
     }
 }
 
-pub mod parser {
-
-}
+pub mod parser {}
 
 pub mod day02 {
     use super::utils;
@@ -88,9 +86,10 @@ pub mod day02 {
     use nom::character::complete::{alpha1, char, multispace0, one_of};
     use nom::combinator::map_res;
     use nom::error::ParseError;
-    use nom::Finish;
     use nom::multi::{many0, many1};
     use nom::sequence::{delimited, terminated};
+    use nom::Finish;
+    use std::convert::TryFrom;
 
     use nom::{combinator::recognize, sequence::separated_pair, IResult};
 
@@ -136,21 +135,32 @@ pub mod day02 {
         let (input, password_char) = ws(password_character)(input)?;
         let (_, password) = ws(password_contents)(input)?;
 
-        let pwd_char  = String::from(password_char).chars().next().expect("should have found a password constraint...");
+        let pwd_char = String::from(password_char)
+            .chars()
+            .next()
+            .expect("should have found a password constraint...");
 
         // println!("input: {:?}", input);
         // println!("max: {:?}", max);
         // println!("min: {:?}", min);
         // println!("pw character: {:?}", password_char);
         // println!("password: {:?}", password);
-        
-        Ok((input, Problem { max, min, password: String::from(password), password_char: pwd_char }))
+
+        Ok((
+            input,
+            Problem {
+                max,
+                min,
+                password: String::from(password),
+                password_char: pwd_char,
+            },
+        ))
     }
 
     fn is_valid(pwd: &Problem) -> bool {
         let constraint = pwd.password_char;
         let mut chars = pwd.password.chars();
-        let total = chars.by_ref().filter(|&c| c == constraint ).count() as u32;
+        let total = chars.by_ref().filter(|&c| c == constraint).count() as u32;
         let valid = total >= pwd.min && total <= pwd.max;
         // println!("total {:?}", total);
         // println!("min {:?}", pwd.min);
@@ -159,24 +169,46 @@ pub mod day02 {
         return valid;
     }
 
-    fn solve(passwords: Vec<&str>) -> u32 {
-        let mut total_valid = 0;
+    fn is_valid_part_2(p: &Problem) -> bool {
+        let mut password_chars = p.password.chars();
+        let first_idx = p.min - 1;
+        let last_idx = p.max - 1;
+        println!("{:?}", password_chars);
+        if password_chars.find(|&c| c == p.password_char).is_none() {
+            return false;
+        }
+
+        let first_char = p.password.clone().chars()
+            .nth(usize::try_from(first_idx).unwrap())
+            .unwrap();
+        let last_char = p.password.clone().chars()
+            .nth(usize::try_from(last_idx).unwrap())
+            .unwrap();
+        println!("{:?} {:?}", first_idx, first_char);
+        println!("{:?}", last_char);
+        let valid = (p.password_char == first_char || p.password_char == last_char) && (first_char != last_char);
+        println!("{:?}", valid);
+        valid
+    }
+
+    fn solve(passwords: Vec<&str>) -> (u32, u32) {
+        let mut total_valid_1 = 0;
+        let mut total_valid_2 = 0;
 
         for p in passwords {
             if let Ok(parsed) = parser(p).finish() {
-            let (_, p) = parsed;
-            
-            if is_valid(&p) {
-                total_valid = total_valid + 1;
+                let (_, p) = parsed;
+
+                if is_valid(&p) {
+                    total_valid_1 = total_valid_1 + 1;
+                }
+                if is_valid_part_2(&p) {
+                    total_valid_2 = total_valid_2 + 1;
+                }
             }
         }
-        }
 
-        total_valid
-    }
-
-    fn parse(input: &str) {
-        println!("my parser output: #{:?}", parser(input))
+        (total_valid_1, total_valid_2)
     }
 
     pub fn call(scenario: &str) {
@@ -190,8 +222,11 @@ pub mod day02 {
                 .map(|s| s.trim())
                 .filter(|s| !s.is_empty())
                 .collect();
-            let valid_passwords = solve(input_vector);
-            println!("{:?}", valid_passwords);
+            let part_1 = scenario["outputs"][0].as_i64().unwrap();
+            let part_2 = scenario["outputs"][1].as_i64().unwrap();
+            let (sol_1, sol_2) = solve(input_vector);
+            assert_eq!(i64::from(sol_1), part_1);
+            assert_eq!(i64::from(sol_2), part_2);
         }
     }
 }
