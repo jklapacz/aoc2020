@@ -88,6 +88,7 @@ pub mod day02 {
     use nom::character::complete::{alpha1, char, multispace0, one_of};
     use nom::combinator::map_res;
     use nom::error::ParseError;
+    use nom::Finish;
     use nom::multi::{many0, many1};
     use nom::sequence::{delimited, terminated};
 
@@ -97,7 +98,7 @@ pub mod day02 {
     struct Problem {
         min: u32,
         max: u32,
-        password_char: String,
+        password_char: char,
         password: String,
     }
 
@@ -131,17 +132,47 @@ pub mod day02 {
     }
 
     fn parser(input: &str) -> IResult<&str, Problem> {
-        let (input, (max, min)) = ws(password_criteria)(input)?;
+        let (input, (min, max)) = ws(password_criteria)(input)?;
         let (input, password_char) = ws(password_character)(input)?;
         let (_, password) = ws(password_contents)(input)?;
 
-        println!("input: {:?}", input);
-        println!("max: {:?}", max);
-        println!("min: {:?}", min);
-        println!("pw character: {:?}", password_char);
-        println!("password: {:?}", password);
+        let pwd_char  = String::from(password_char).chars().next().expect("should have found a password constraint...");
+
+        // println!("input: {:?}", input);
+        // println!("max: {:?}", max);
+        // println!("min: {:?}", min);
+        // println!("pw character: {:?}", password_char);
+        // println!("password: {:?}", password);
         
-        Ok((input, Problem { max, min, password: String::from(password), password_char: String::from(password_char) }))
+        Ok((input, Problem { max, min, password: String::from(password), password_char: pwd_char }))
+    }
+
+    fn is_valid(pwd: &Problem) -> bool {
+        let constraint = pwd.password_char;
+        let mut chars = pwd.password.chars();
+        let total = chars.by_ref().filter(|&c| c == constraint ).count() as u32;
+        let valid = total >= pwd.min && total <= pwd.max;
+        // println!("total {:?}", total);
+        // println!("min {:?}", pwd.min);
+        // println!("max {:?}", pwd.max);
+        // println!("valid {:?}", valid);
+        return valid;
+    }
+
+    fn solve(passwords: Vec<&str>) -> u32 {
+        let mut total_valid = 0;
+
+        for p in passwords {
+            if let Ok(parsed) = parser(p).finish() {
+            let (_, p) = parsed;
+            
+            if is_valid(&p) {
+                total_valid = total_valid + 1;
+            }
+        }
+        }
+
+        total_valid
     }
 
     fn parse(input: &str) {
@@ -159,11 +190,8 @@ pub mod day02 {
                 .map(|s| s.trim())
                 .filter(|s| !s.is_empty())
                 .collect();
-            for iv in input_vector {
-                parse(&iv);
-            }
-            break;
-            // println!("{:?}", scenario);
+            let valid_passwords = solve(input_vector);
+            println!("{:?}", valid_passwords);
         }
     }
 }
