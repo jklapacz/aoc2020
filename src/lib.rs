@@ -48,18 +48,14 @@ pub mod utils {
                 .map(|s| String::from(s.trim()))
                 .filter(|s| !s.is_empty())
                 .collect();
-            // println!("getting better data {:?}", scenario);
             let mut outputs: Vec<String> = vec![];
-            println!("raw outputs {:?}", scenario["outputs"]);
             let potential = scenario["outputs"].as_vec();
             match potential {
                 Some(o) => {
-                    println!("o ----- {:?}", o);
                     for output in o.into_iter() {
                         if let Some(maybe_string) = output.as_i64() {
                             outputs.push(maybe_string.to_string());
                         }
-                        // println!("output ----- {:?}", *output.to_string());
                         if let Some(maybe_string) = output.as_str() {
                             outputs.push(String::from(maybe_string));
                         }
@@ -67,14 +63,6 @@ pub mod utils {
                 }
                 None => (),
             }
-            println!("outputs {:?}", outputs);
-            // let outputs: Vec<String> = scenario["outputs"]
-            //     .as_vec()
-            //     .unwrap()
-            //     .into_iter()
-            //     .map(|item| {println!("{:?}", item); item})
-            //     .map(|item| String::from(*item.into_string().unwrap()))
-            //     .collect();
 
             collection.push(Scenario { input, outputs });
         }
@@ -101,8 +89,6 @@ pub mod day01 {
             assert_eq!(part_1, scenario["outputs"][0].as_i64().unwrap());
             let part_2 = find_sum_3_to_2020(&input_vector);
             assert_eq!(part_2, scenario["outputs"][1].as_i64().unwrap());
-            println!("part 1 answer: {:?}", part_1);
-            println!("part 2 answer: {:?}", part_2);
         }
     }
 
@@ -216,7 +202,6 @@ pub mod day02 {
         let mut password_chars = p.password.chars();
         let first_idx = p.min - 1;
         let last_idx = p.max - 1;
-        println!("{:?}", password_chars);
         if password_chars.find(|&c| c == p.password_char).is_none() {
             return false;
         }
@@ -233,12 +218,7 @@ pub mod day02 {
             .chars()
             .nth(usize::try_from(last_idx).unwrap())
             .unwrap();
-        println!("{:?} {:?}", first_idx, first_char);
-        println!("{:?}", last_char);
-        let valid = (p.password_char == first_char || p.password_char == last_char)
-            && (first_char != last_char);
-        println!("{:?}", valid);
-        valid
+        (p.password_char == first_char || p.password_char == last_char) && (first_char != last_char)
     }
 
     fn solve(passwords: Vec<String>) -> Vec<u32> {
