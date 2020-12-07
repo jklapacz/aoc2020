@@ -27,6 +27,59 @@ pub mod utils {
         }
         return contents;
     }
+
+    pub struct Scenario {
+        pub input: Vec<String>,
+        pub outputs: Vec<String>,
+    }
+
+    pub fn read_scenario<P>(filename: P) -> Result<Vec<Scenario>, ScanError>
+    where
+        P: AsRef<Path>,
+    {
+        let scenario_yaml = read_yaml(filename).unwrap();
+        let scenarios = &scenario_yaml[0]["scenarios"].as_vec().unwrap();
+        let mut collection: Vec<Scenario> = vec![];
+        for scenario in scenarios.iter() {
+            let input: Vec<String> = scenario["input"]
+                .as_str()
+                .unwrap()
+                .split("\n")
+                .map(|s| String::from(s.trim()))
+                .filter(|s| !s.is_empty())
+                .collect();
+            // println!("getting better data {:?}", scenario);
+            let mut outputs: Vec<String> = vec![];
+            println!("raw outputs {:?}", scenario["outputs"]);
+            let potential = scenario["outputs"].as_vec();
+            match potential {
+                Some(o) => {
+                    println!("o ----- {:?}", o);
+                    for output in o.into_iter() {
+                        if let Some(maybe_string) = output.as_i64() {
+                            outputs.push(maybe_string.to_string());
+                        }
+                        // println!("output ----- {:?}", *output.to_string());
+                        if let Some(maybe_string) = output.as_str() {
+                            outputs.push(String::from(maybe_string));
+                        }
+                    }
+                }
+                None => (),
+            }
+            println!("outputs {:?}", outputs);
+            // let outputs: Vec<String> = scenario["outputs"]
+            //     .as_vec()
+            //     .unwrap()
+            //     .into_iter()
+            //     .map(|item| {println!("{:?}", item); item})
+            //     .map(|item| String::from(*item.into_string().unwrap()))
+            //     .collect();
+
+            collection.push(Scenario { input, outputs });
+        }
+        return Ok(collection);
+    }
 }
 
 pub mod day01 {
@@ -140,12 +193,6 @@ pub mod day02 {
             .next()
             .expect("should have found a password constraint...");
 
-        // println!("input: {:?}", input);
-        // println!("max: {:?}", max);
-        // println!("min: {:?}", min);
-        // println!("pw character: {:?}", password_char);
-        // println!("password: {:?}", password);
-
         Ok((
             input,
             Problem {
@@ -162,10 +209,6 @@ pub mod day02 {
         let mut chars = pwd.password.chars();
         let total = chars.by_ref().filter(|&c| c == constraint).count() as u32;
         let valid = total >= pwd.min && total <= pwd.max;
-        // println!("total {:?}", total);
-        // println!("min {:?}", pwd.min);
-        // println!("max {:?}", pwd.max);
-        // println!("valid {:?}", valid);
         return valid;
     }
 
@@ -178,25 +221,32 @@ pub mod day02 {
             return false;
         }
 
-        let first_char = p.password.clone().chars()
+        let first_char = p
+            .password
+            .clone()
+            .chars()
             .nth(usize::try_from(first_idx).unwrap())
             .unwrap();
-        let last_char = p.password.clone().chars()
+        let last_char = p
+            .password
+            .clone()
+            .chars()
             .nth(usize::try_from(last_idx).unwrap())
             .unwrap();
         println!("{:?} {:?}", first_idx, first_char);
         println!("{:?}", last_char);
-        let valid = (p.password_char == first_char || p.password_char == last_char) && (first_char != last_char);
+        let valid = (p.password_char == first_char || p.password_char == last_char)
+            && (first_char != last_char);
         println!("{:?}", valid);
         valid
     }
 
-    fn solve(passwords: Vec<&str>) -> (u32, u32) {
+    fn solve(passwords: Vec<String>) -> Vec<u32> {
         let mut total_valid_1 = 0;
         let mut total_valid_2 = 0;
 
         for p in passwords {
-            if let Ok(parsed) = parser(p).finish() {
+            if let Ok(parsed) = parser(&p).finish() {
                 let (_, p) = parsed;
 
                 if is_valid(&p) {
@@ -208,25 +258,27 @@ pub mod day02 {
             }
         }
 
-        (total_valid_1, total_valid_2)
+        vec![total_valid_1, total_valid_2]
     }
 
     pub fn call(scenario: &str) {
-        let scenario_yaml = utils::read_yaml(scenario).unwrap();
-        let scenarios = &scenario_yaml[0]["scenarios"].as_vec().unwrap();
-        for scenario in scenarios.iter() {
-            let input_vector: Vec<&str> = scenario["input"]
-                .as_str()
-                .unwrap()
-                .split("\n")
-                .map(|s| s.trim())
-                .filter(|s| !s.is_empty())
-                .collect();
-            let part_1 = scenario["outputs"][0].as_i64().unwrap();
-            let part_2 = scenario["outputs"][1].as_i64().unwrap();
-            let (sol_1, sol_2) = solve(input_vector);
-            assert_eq!(i64::from(sol_1), part_1);
-            assert_eq!(i64::from(sol_2), part_2);
+        if let Ok(scenarios) = utils::read_scenario(scenario) {
+            for s in scenarios.iter() {
+                solve(s.input.clone())
+                    .iter()
+                    .map(|i| i.to_string())
+                    .zip(s.outputs.iter())
+                    .for_each(|(actual, expected)| assert_eq!(&actual, expected));
+            }
+        }
+    }
+}
+
+pub mod day03 {
+    use super::utils;
+    pub fn call(scenario: &str) {
+        for scenario in utils::read_scenario(scenario).unwrap().iter() {
+            println!("{:?}", scenario.input)
         }
     }
 }
