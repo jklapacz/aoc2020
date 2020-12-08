@@ -1,4 +1,5 @@
 pub mod utils {
+    use log::error;
     use std::fs::File;
     use std::io::Read;
     use std::path::Path;
@@ -21,7 +22,7 @@ pub mod utils {
 
         if let Ok(mut file) = file {
             match file.read_to_string(&mut contents) {
-                Err(e) => println!("{:?}", e),
+                Err(e) => error!("{:?}", e),
                 _ => (),
             }
         }
@@ -257,25 +258,7 @@ pub mod day02 {
 pub mod day03 {
     use super::utils;
     use std::collections::HashMap;
-
-    // #[derive(Hash)]
-    // struct Coordinate {
-    //     x: u32,
-    //     y: u32
-    // }
-
-    // impl PartialEq for Coordinate {
-    //     fn eq(&self, other: &Self) -> bool {
-    //         self.x == other.x && self.y == other.y
-    //     }
-    // }
-
-    // impl Eq for Coordinate {}
-
-    // struct Cell<'b> {
-    //     loc: &'b Coordinate,
-    //     value: String
-    // }
+    use log::debug;
 
     struct Grid<'a> {
         patterns: Vec<&'a str>,
@@ -314,7 +297,6 @@ pub mod day03 {
         fn at(&mut self, coordinates: (u32, u32)) -> &'a str {
             let (x, y) = coordinates;
             let index = Grid::compute_index(x, y);
-            // let coord = Coordinate { x, y };
             match self.cells.get(&index) {
                 Some(&cell) => return cell,
                 _ => {
@@ -322,14 +304,10 @@ pub mod day03 {
                     let pattern_offset = x as usize % pattern.len();
 
                     let val = &pattern[pattern_offset..pattern_offset + 1];
-                    // let (_, val) = &pattern.char_indices().nth(pattern_offset as usize).unwrap();
-                    // let cell = Cell<'a> { loc: &coord, value: val.to_string() };
                     self.cells.insert(index, val);
                     val
                 }
             }
-            // first get pattern using 'y'
-            //
         }
     }
 
@@ -346,11 +324,11 @@ pub mod day03 {
                 let (d_x, d_y) = slope;
                 let p = g.plot((0, 0), *d_x, *d_y);
                 let trees = count_trees(p);
-                println!("slope[{:?}] - {:?}", slope, trees);
+                debug!("slope[{:?}] - {:?}", slope, trees);
                 acc * trees as u64
             });
 
-            println!("{:?}", magic_number);
+            debug!("{:?}", magic_number);
         }
     }
 }
