@@ -256,9 +256,101 @@ pub mod day02 {
 
 pub mod day03 {
     use super::utils;
+    use std::collections::HashMap;
+
+    // #[derive(Hash)]
+    // struct Coordinate {
+    //     x: u32,
+    //     y: u32
+    // }
+
+    // impl PartialEq for Coordinate {
+    //     fn eq(&self, other: &Self) -> bool {
+    //         self.x == other.x && self.y == other.y
+    //     }
+    // }
+
+    // impl Eq for Coordinate {}
+
+    // struct Cell<'b> {
+    //     loc: &'b Coordinate,
+    //     value: String
+    // }
+
+    struct Grid<'a> {
+        patterns: Vec<&'a str>,
+        cells: HashMap<u32, &'a str>,
+        size: usize,
+    }
+
+    impl<'a> Grid<'a> {
+        fn new(input: Vec<&'a str>) -> Grid<'a> {
+            let cells = HashMap::new();
+            let size = input.len() - 1;
+            let patterns = input;
+            let grid = Grid {
+                cells,
+                patterns,
+                size,
+            };
+            return grid;
+        }
+
+        fn compute_index(x: u32, y: u32) -> u32 {
+            10000 * x + y
+        }
+
+        fn plot(&mut self, origin: (u32, u32), delta_x: u32, delta_y: u32) -> Vec<&'a str> {
+            let (mut cur_x, mut cur_y) = origin;
+            let mut points_visited = vec![];
+            while cur_y <= self.size as u32 {
+                points_visited.push(self.at((cur_x, cur_y)));
+                cur_x = cur_x + delta_x;
+                cur_y = cur_y + delta_y;
+            }
+            points_visited
+        }
+
+        fn at(&mut self, coordinates: (u32, u32)) -> &'a str {
+            let (x, y) = coordinates;
+            let index = Grid::compute_index(x, y);
+            // let coord = Coordinate { x, y };
+            match self.cells.get(&index) {
+                Some(&cell) => return cell,
+                _ => {
+                    let pattern = self.patterns[y as usize];
+                    let pattern_offset = x as usize % pattern.len();
+
+                    let val = &pattern[pattern_offset..pattern_offset + 1];
+                    // let (_, val) = &pattern.char_indices().nth(pattern_offset as usize).unwrap();
+                    // let cell = Cell<'a> { loc: &coord, value: val.to_string() };
+                    self.cells.insert(index, val);
+                    val
+                }
+            }
+            // first get pattern using 'y'
+            //
+        }
+    }
+
+    fn count_trees(plot: Vec<&str>) -> u32 {
+        plot.iter().filter(|&&x| x == "#").count() as u32
+    }
+
     pub fn call(scenario: &str) {
         for scenario in utils::read_scenario(scenario).unwrap().iter() {
-            println!("{:?}", scenario.input)
+            let input = scenario.input.iter().map(String::as_str).collect();
+            let mut g = Grid::new(input);
+            let slopes: Vec<(u32, u32)> = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
+            let magic_number = slopes.iter().fold(1 as u64, |acc, slope| {
+                let (d_x, d_y) = slope;
+                let p = g.plot((0, 0), *d_x, *d_y);
+                let trees = count_trees(p);
+                println!("slope[{:?}] - {:?}", slope, trees);
+                acc * trees as u64
+            });
+
+            println!("{:?}", magic_number);
         }
     }
 }
