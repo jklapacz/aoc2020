@@ -149,7 +149,7 @@ pub mod day02 {
         map_res(decimal_helper, |s: &str| s.parse())(input)
     }
 
-    fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
+    pub fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
         inner: F,
     ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
     where
@@ -332,3 +332,107 @@ pub mod day03 {
         }
     }
 }
+
+pub mod day04 {
+    use nom::branch::{permutation, alt};
+    use nom::bytes::complete::tag;
+    use nom::character::complete::*;
+    use nom::{AsChar,InputTakeAtPosition, sequence::separated_pair, error::ParseError, IResult, Parser};
+    use super::day02::ws;
+    use nom::combinator::iterator;
+    use nom::sequence::terminated;
+    use std::collections::HashMap;
+
+
+    // fn att_1(input: &str) -> IResult<&str, (u32, u32)> {
+    //     separated_pair(decimal, tag("-"), decimal)(input)
+    // }
+
+
+
+    // fn rp<'a, I, O1, O2, E: ParseError<I>, F>(f: F) -> impl FnMut(I) -> IResult<I, (O1, I), E>
+    // where
+        // I: nom::InputIter + nom::InputLength + nom::Slice<nom::lib::std::ops::RangeFrom<usize>>,
+        // I: InputTakeAtPosition,
+        // <I as nom::InputIter>::Item: AsChar,
+        // <I as InputTakeAtPosition>::Item: AsChar,
+        // F: Parser<I, O1, E>
+    // {
+        // separated_pair(f, tag(":"), anychar)
+    // }
+    fn charss<'a, E: ParseError<&'a str>>(s: &'a str) -> impl Fn(&'a str) -> IResult<&'a str, (Vec<&str>, &str), E> {
+        move |s: &'a str| nom::multi::many_till(alt((alphanumeric1, tag(":"), tag("#"))), space1)(s)
+    }
+
+    fn find<'a, E: ParseError<&'a str>>(s: &'a str) -> impl Fn(&'a str) -> IResult<&'a str, (&str, &str), E> {
+        move |i: &'a str| separated_pair(tag(s), tag(":"), alphanumeric1)(i)
+    }
+
+    fn parser<'a>(input: &'a str) -> IResult<&str, ((&str, &str), (&str, &str), (&str, &str), (&str, &str), (&str, &str), (&str, &str), (&str, &str), Option<(&str, &str)>)> {
+
+        // for req in vec!["byr", "iyr"] {
+        //     parsers.push(find(req));
+        // }
+        let p1 = ws(find("byr"));
+        let p2 = ws(find("iyr"));
+        let p3 = ws(find("eyr"));
+        let p4 = ws(find("hgt"));
+        let p5 = ws(find("hcl"));
+        let p6 = ws(find("ecl"));
+        let p7 = ws(find("pid"));
+        let p8 = ws(find("cid"));
+
+        let p = |s: &'a str| nom::multi::many_till(alt((alphanumeric1, tag(":"), tag("#"))), space1)(s);
+        let mut it = iterator(&input[..], terminated(p, multispace1));
+        let parsed = it.map(|v| (v)).collect::<HashMap<_,_>>();
+        let res: IResult<_,_> = it.finish();
+
+        println!("parsed {:?}", parsed);
+        println!("res {:?}", res);
+
+        permutation(
+            (p1, p2, p3, p4, p5, p6, p7, nom::combinator::opt(p8))
+        )(input)
+    }
+
+    // fn required_fields(input: &str) {
+        // let a = permutation((
+            // rp("byr"),
+            // rp("iyr"),
+            // rp("eyr"),
+            // rp("hgt"),
+            // rp("hcl"),
+            // rp("ecl"),
+            // rp("pid")
+        // )(input);
+//
+    // }
+
+    pub fn call(scenario: &str) {
+        let parsed = parser(scenario);
+        println!("{:?}", parsed);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
